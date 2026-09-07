@@ -1,0 +1,12 @@
+# Змінні середовища
+.env
+
+# Віртуальне середовище Python
+venv/
+env/
+__pycache__/
+*.pyc
+
+# IDE
+.vscode/
+.idea/

@@ -1,12 +1,17 @@
+import os
 import psycopg2
 from psycopg2 import sql
+from dotenv import load_dotenv
+
+# Завантаження змінних середовища з файлу .env
+load_dotenv()
 
 # Параметри підключення до вашої бази даних
-host = 'junction.proxy.rlwy.net'
-port = '19910'  # порт з Railway
-database = 'RailwayDB'  # ім'я бази даних
-user = 'postgres'  # користувач
-password = 'ygenbXELPjFcAdfMKwzQwfXmPGDJIAqu'  # пароль з Railway
+host = os.environ.get('DB_HOST', 'junction.proxy.rlwy.net')
+port = os.environ.get('DB_PORT', '19910')  # порт з Railway
+database = os.environ.get('DB_NAME', 'RailwayDB')  # ім'я бази даних
+user = os.environ.get('DB_USER', 'postgres')  # користувач
+password = os.environ.get('DB_PASSWORD')  # пароль береться зі змінної середовища
 
 # Створення з'єднання з базою даних
 try:
