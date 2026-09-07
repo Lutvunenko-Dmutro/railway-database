@@ -12,8 +12,7 @@
 ![Frontend](https://img.shields.io/badge/Frontend-HTML/CSS/JS-orange)
 ![CI Status](https://github.com/Lutvunenko-Dmutro/railway-database/actions/workflows/ci.yml/badge.svg)
 
-### Огляд
-Цей репозиторій — це full-stack проєкт (proof-of-concept), який демонструє інтеграцію Python Flask REST API з базою даних PostgreSQL. Проєкт включає безпечне управління конфігурацією, прямі SQL-міграції бази даних та сучасний, повністю адаптивний "Кіберпанк" UI-дашборд для управління даними.
+Цей репозиторій — full-stack проєкт, що демонструє інтеграцію Python Flask REST API з базою даних PostgreSQL. Реалізовано безпечне управління конфігурацією, прямі SQL-міграції бази даних та сучасний UI-дашборд для зручного управління даними.
 
 ### Скріншоти інтерфейсу
 ![UI Dashboard Preview](assets/demo-dashboard.png)
@@ -21,7 +20,7 @@
 
 ### Основні можливості
 - **Flask REST API:** Надає ендпоінти (напр., `GET /api/users`, `POST /api/users`, `PUT /api/users/<id>`, `DELETE /api/users/<id>`) для програмної взаємодії з базою даних.
-- **Сучасний UI Дашборд:** Фронтенд побудований на чистому (vanilla) HTML/CSS/JS з кіберпанк-естетикою (скляний морфізм, CSS-grid, модульна архітектура). Дашборд підтримує перемикання мов (УКР/EN).
+- **Сучасний UI Дашборд:** Фронтенд написаний на чистому (vanilla) HTML/CSS/JS (скляний морфізм, CSS-grid, модульна архітектура) з підтримкою швидкого перемикання мов (УКР/EN).
 - **Кастомні помилки:** Повністю стилізована кастомна сторінка помилки 404.
 - **CI/CD Pipeline:** Інтегровані GitHub Actions для автоматичного запуску `pytest` та перевірки якості коду при кожному коміті.
 - **Безпечна конфігурація:** Використовує `python-dotenv`, щоб уникнути витоку чутливих даних.
@@ -100,7 +99,7 @@
 ## <a id="english-version"></a>🇺🇸 English Version
 
 ### Overview
-This repository is a full-stack proof-of-concept project demonstrating the integration of a Python Flask REST API with a PostgreSQL database. It features secure credential management, raw SQL schema migrations, and a modern, fully responsive "Cyberpunk" UI dashboard to visualize the database content.
+This repository is a full-stack project demonstrating the integration of a Python Flask REST API with a PostgreSQL database. It features secure credential management, raw SQL schema migrations, and a modern UI dashboard to manage and visualize the database content.
 
 ### Screenshots
 ![UI Dashboard Preview](assets/demo-dashboard-en.png)
@@ -108,7 +107,7 @@ This repository is a full-stack proof-of-concept project demonstrating the integ
 
 ### Key Features
 - **Flask REST API:** Provides endpoints (e.g., `GET /api/users`, `POST /api/users`, `PUT`, `DELETE`) to interact with the database programmatically.
-- **Modern UI Dashboard:** A frontend built with vanilla HTML/CSS/JS featuring a Cyberpunk aesthetic. Features built-in i18n language switching.
+- **Modern UI Dashboard:** A frontend built with vanilla HTML/CSS/JS. Features built-in i18n language switching between English and Ukrainian.
 - **Custom Error Handling:** A fully designed, responsive custom 404 error page.
 - **CI/CD Pipeline:** Includes GitHub Actions workflow for automated testing (`pytest`) on every commit and pull request.
 - **Secure Configuration:** Utilizes `python-dotenv` to ensure no sensitive credentials are leaked.
