@@ -101,7 +101,7 @@
 This repository is a full-stack proof-of-concept project demonstrating the integration of a Python Flask REST API with a PostgreSQL database. It features secure credential management, raw SQL schema migrations, and a modern, fully responsive "Cyberpunk" UI dashboard to visualize the database content.
 
 ### Screenshots
-![UI Dashboard Preview](assets/demo-dashboard.png)
+![UI Dashboard Preview](assets/demo-dashboard-en.png)
 ![API Response Preview](assets/demo-api.png)
 
 ### Key Features
