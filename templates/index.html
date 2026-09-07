@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PostgreSQL Management Interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/index.css">
+</head>
+<body>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+
+    <div id="toast" class="toast">
+        <div class="toast-icon" id="toastIcon"></div>
+        <div class="toast-message" id="toastMessage"></div>
+    </div>
+
+    <div class="container">
+        <div class="glass-panel main-panel">
+            <header class="dashboard-header">
+                <div class="header-content">
+                    <h1 data-i18n="title">API System Dashboard</h1>
+                    <p class="subtitle" data-i18n="subtitle">Live database synchronization and REST API management. Powered by Python, Flask, and PostgreSQL.</p>
+                </div>
+                <div class="header-controls">
+                    <div class="lang-switch">
+                        <button class="lang-btn active" id="btn-en" onclick="setLang('en')">EN</button>
+                        <button class="lang-btn" id="btn-uk" onclick="setLang('uk')">УКР</button>
+                    </div>
+                    <div class="endpoints">
+                        <div class="badge badge-get"><span class="method">GET</span> /api/users</div>
+                        <div class="badge badge-post"><span class="method">POST</span> /api/users</div>
+                        <div class="badge badge-put"><span class="method">PUT</span> /api/users/&lt;id&gt;</div>
+                        <div class="badge badge-delete"><span class="method">DEL</span> /api/users/&lt;id&gt;</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="dashboard-grid">
+                <div class="card form-card">
+                    <h2>
+                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+                        <span id="formTitle" data-i18n="add_user_title">Add New User</span>
+                    </h2>
+                    <form id="addUserForm" onsubmit="submitUser(event)">
+                        <div class="form-group">
+                            <label for="username"><span data-i18n="label_username">Username</span> <span class="required">*</span></label>
+                            <input type="text" id="username" name="username" placeholder="e.g. cyber_ninja" required autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label for="name"><span data-i18n="label_name">Full Name</span></label>
+                            <input type="text" id="name" name="name" placeholder="John Doe" autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label for="email"><span data-i18n="label_email">Email Address</span></label>
+                            <input type="email" id="email" name="email" placeholder="john@example.com" autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label for="age"><span data-i18n="label_age">Age</span></label>
+                            <input type="number" id="age" name="age" placeholder="25" min="18" max="120">
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn-cancel" id="cancelBtn" onclick="cancelEdit()">
+                                <span data-i18n="btn_cancel">Cancel</span>
+                            </button>
+                            <button type="submit" class="btn-submit" id="submitBtn">
+                                <span id="submitBtnText" data-i18n="btn_create">Create User</span>
+                                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card table-card">
+                    <div class="table-header-row">
+                        <h2>
+                            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+                            <span data-i18n="records_title">Database Records</span>
+                        </h2>
+                        <button class="btn-refresh" onclick="loadUsers()" id="refreshBtn">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                            <span data-i18n="btn_refresh">Refresh</span>
+                        </button>
+                    </div>
+
+                    <div class="table-container">
+                        <table id="usersTable">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th data-i18n="th_username">USERNAME</th>
+                                    <th data-i18n="th_name">NAME</th>
+                                    <th data-i18n="th_email">EMAIL</th>
+                                    <th data-i18n="th_age">AGE</th>
+                                    <th data-i18n="th_actions" style="text-align: right;">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersBody">
+                                <tr><td colspan="6" class="loading-state" data-i18n="msg_init">Initializing connection...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/translations.js?v=2"></script>
+    <script src="/static/main.js?v=5"></script>
+</body>
+</html>

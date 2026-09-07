@@ -1,98 +1,189 @@
 import os
+import re
 import psycopg2
-from psycopg2 import sql
+from psycopg2.extras import RealDictCursor
+from flask import Flask, jsonify, request, render_template
 from dotenv import load_dotenv
+from database import get_db_connection, init_db
 
-# Завантаження змінних середовища з файлу .env
 load_dotenv()
 
-# Параметри підключення до вашої бази даних
-host = os.environ.get('DB_HOST', 'junction.proxy.rlwy.net')
-port = os.environ.get('DB_PORT', '19910')  # порт з Railway
-database = os.environ.get('DB_NAME', 'RailwayDB')  # ім'я бази даних
-user = os.environ.get('DB_USER', 'postgres')  # користувач
-password = os.environ.get('DB_PASSWORD')  # пароль береться зі змінної середовища
+app = Flask(__name__)
 
-# Створення з'єднання з базою даних
-try:
-    connection = psycopg2.connect(
-        host=host,
-        port=port,
-        database=database,
-        user=user,
-        password=password
-    )
-    
-    cursor = connection.cursor()
+# --- Роути сторінок ---
+@app.route('/')
+def index():
+    """Повертає головну сторінку Dashboard."""
+    return render_template('index.html')
 
-    # Перевірка, чи існує таблиця
-    cursor.execute("""
-    SELECT to_regclass('public.users');
-    """)
-    table_exists = cursor.fetchone()[0]
-    
-    if table_exists:
-        print("Таблиця 'users' вже існує.")
-    else:
-        print("Таблиця 'users' не знайдена.")
-        # Можна створити таблицю, якщо вона не існує (необов'язково, якщо ви впевнені, що вона є)
-        create_table_query = '''
-        CREATE TABLE users (
-            id SERIAL PRIMARY KEY,
-            username VARCHAR(100) NOT NULL,
-            name VARCHAR(100),
-            age INT,
-            email VARCHAR(100),  -- Додав стовпець email
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        '''
-        cursor.execute(create_table_query)
-        connection.commit()
-        print("Таблиця успішно створена!")
+@app.errorhandler(404)
+def page_not_found(e):
+    """Кастомна 404 помилка з голограмою."""
+    return render_template('404.html'), 404
 
-    # Перевірка структури таблиці і додавання стовпців, якщо їх немає
-    cursor.execute("""
-    SELECT column_name
-    FROM information_schema.columns
-    WHERE table_name = 'users';
-    """)
-    
-    columns = [column[0] for column in cursor.fetchall()]
-    if 'name' not in columns:
-        cursor.execute('ALTER TABLE users ADD COLUMN name VARCHAR(100);')
-        print("Стовпець 'name' додано.")
-    if 'age' not in columns:
-        cursor.execute('ALTER TABLE users ADD COLUMN age INT;')
-        print("Стовпець 'age' додано.")
-    if 'username' not in columns:
-        cursor.execute('ALTER TABLE users ADD COLUMN username VARCHAR(100) NOT NULL;')
-        print("Стовпець 'username' додано.")
-    if 'email' not in columns:
-        cursor.execute('ALTER TABLE users ADD COLUMN email VARCHAR(100);')  # Додав email
-        print("Стовпець 'email' додано.")
-    
-    connection.commit()
-
-    # Додавання нового запису з email
-    insert_query = '''
-    INSERT INTO users (username, name, age, email) VALUES (%s, %s, %s, %s);
-    '''
-    cursor.execute(insert_query, ('jane_smith', 'Jane Smith', 30, 'jane.smith@example.com'))
-    connection.commit()
-    print("Новий запис успішно доданий!")
-
-    # Отримання та виведення даних з таблиці
-    cursor.execute("SELECT * FROM users;")
-    rows = cursor.fetchall()
-    for row in rows:
-        print(row)
-
-except Exception as error:
-    print(f"Помилка при підключенні або виконанні запиту: {error}")
-
-finally:
-    # Закриття курсору та з'єднання
-    if cursor:
+# --- API Роути ---
+@app.route('/api/users', methods=['GET'])
+def get_users():
+    """Повертає список всіх користувачів."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        cursor.execute('SELECT * FROM users ORDER BY id DESC;')
+        users = cursor.fetchall()
         cursor.close()
-    if connection:
-        connection.close()
+        conn.close()
+        return jsonify(users)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/users', methods=['POST'])
+def add_user():
+    """Додає нового користувача."""
+    data = request.get_json()
+    if not data or 'username' not in data:
+        return jsonify({"error": "Відсутній обов'язковий параметр username"}), 400
+
+    username = data.get('username')
+    name = data.get('name')
+    age = data.get('age')
+    email = data.get('email')
+
+    # Валідація віку
+    if age is not None and age != "":
+        try:
+            age = int(age)
+            if age < 18 or age > 120:
+                return jsonify({"error": "Вік повинен бути від 18 до 120 років"}), 400
+        except ValueError:
+            return jsonify({"error": "Некоректний формат віку"}), 400
+    else:
+        age = None
+
+    # Валідація email
+    if email:
+        email = email.strip()
+        if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+            return jsonify({"error": "Некоректний формат email адреси"}), 400
+    else:
+        email = None
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute(
+            'INSERT INTO users (username, name, email, age) VALUES (%s, %s, %s, %s) RETURNING id;',
+            (username, name, email, age)
+        )
+        new_id = cursor.fetchone()[0]
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({
+            "message": "Користувача успішно створено",
+            "user": {
+                "id": new_id,
+                "username": username,
+                "name": name,
+                "age": age,
+                "email": email
+            }
+        }), 201
+    except psycopg2.errors.UniqueViolation as e:
+        conn.rollback()
+        error_msg = str(e)
+        if 'unique_email' in error_msg:
+            return jsonify({"error": f"Користувач з email '{email}' вже існує"}), 409
+        return jsonify({"error": f"Користувач з username '{username}' вже існує"}), 409
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/users/<int:user_id>', methods=['PUT'])
+def update_user(user_id):
+    """Оновлює дані існуючого користувача."""
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Дані не надано"}), 400
+        
+    username = data.get('username')
+    name = data.get('name')
+    age = data.get('age')
+    email = data.get('email')
+
+    if not username:
+        return jsonify({"error": "Username є обов'язковим"}), 400
+
+    # Валідація
+    if age is not None and age != "":
+        try:
+            age = int(age)
+            if age < 18 or age > 120:
+                return jsonify({"error": "Вік повинен бути від 18 до 120 років"}), 400
+        except ValueError:
+            return jsonify({"error": "Некоректний формат віку"}), 400
+    else:
+        age = None
+
+    if email:
+        email = email.strip()
+        if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+            return jsonify({"error": "Некоректний формат email адреси"}), 400
+    else:
+        email = None
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT id FROM users WHERE id = %s;', (user_id,))
+        if not cursor.fetchone():
+            cursor.close()
+            conn.close()
+            return jsonify({"error": "Користувача не знайдено"}), 404
+            
+        cursor.execute(
+            'UPDATE users SET username = %s, name = %s, age = %s, email = %s WHERE id = %s;',
+            (username, name, age, email, user_id)
+        )
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({"message": "Дані користувача оновлено"}), 200
+    except psycopg2.errors.UniqueViolation as e:
+        conn.rollback()
+        error_msg = str(e)
+        if 'unique_email' in error_msg:
+            return jsonify({"error": f"Цей email вже використовується іншим користувачем"}), 409
+        return jsonify({"error": f"Користувач з username '{username}' вже існує"}), 409
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/users/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    """Видаляє користувача з бази даних за його ID."""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('SELECT id FROM users WHERE id = %s;', (user_id,))
+        if not cursor.fetchone():
+            cursor.close()
+            conn.close()
+            return jsonify({"error": "Користувача не знайдено"}), 404
+            
+        cursor.execute('DELETE FROM users WHERE id = %s;', (user_id,))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return jsonify({"message": "Користувача успішно видалено"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+if __name__ == '__main__':
+    # Запуск Flask сервера (debug вмикається тільки якщо FLASK_DEBUG=true)
+    is_debug = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+    init_db()
+    app.run(host='0.0.0.0', port=5000, debug=is_debug)

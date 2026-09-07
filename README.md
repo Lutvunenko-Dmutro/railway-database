@@ -1,68 +1,180 @@
+# Full-Stack PostgreSQL REST API & Dashboard
 
-# Практична Робота 4: Створення віддаленої БД на Railway.app
+[🇺🇦 Українська](#українська-версія) | [🇺🇸 English](#english-version)
 
-Цей проект демонструє процес створення віддаленої бази даних на платформі Railway.app. В роботі використано PostgreSQL як тип бази даних.
+---
 
-## Кроки виконання:
+## <a id="українська-версія"></a>🇺🇦 Українська версія
 
-### 1. Реєстрація та створення проекту на Railway.app
-1. Зареєструйтеся на платформі [Railway.app](https://railway.app/).
-2. Створіть новий проект, використовуючи опцію "New Project".
-3. Виберіть шаблон для PostgreSQL бази даних.
+![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
+![Flask](https://img.shields.io/badge/Flask-Web_Framework-black?logo=flask)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-blue.svg)
+![Frontend](https://img.shields.io/badge/Frontend-HTML/CSS/JS-orange)
 
-### 2. Налаштування бази даних
-1. Після створення проекту додайте плагін PostgreSQL.
-2. Отримайте дані для підключення до вашої бази даних, зокрема:
-   - Хост
-   - Порт
-   - Ім'я користувача
-   - Пароль
-   - URL для підключення
+### Огляд
+Цей репозиторій — це full-stack проєкт (proof-of-concept), який демонструє інтеграцію Python Flask REST API з базою даних PostgreSQL. Проєкт включає безпечне управління конфігурацією, прямі SQL-міграції бази даних та сучасний, повністю адаптивний "Кіберпанк" UI-дашборд для управління даними.
 
-### 3. Підключення до БД
-1. Використовуйте отримані дані для підключення до бази даних через **pgAdmin** або інший SQL клієнт.
-2. Перевірте доступність бази даних, підключившись до неї.
+### Скріншоти інтерфейсу
+![UI Dashboard Preview](assets/demo-dashboard.png)
+![API Response Preview](assets/demo-api.png)
 
-### 4. Створення таблиці
-1. Використовуючи SQL консоль, створіть таблицю в базі даних:
-   ```sql
-   CREATE TABLE users (
-       id SERIAL PRIMARY KEY,
-       name VARCHAR(100),
-       email VARCHAR(100)
-   );
+### Основні можливості
+- **Flask REST API:** Надає ендпоінти (напр., `GET /api/users`, `POST /api/users`, `PUT /api/users/<id>`, `DELETE /api/users/<id>`) для програмної взаємодії з базою даних.
+- **Сучасний UI Дашборд:** Фронтенд побудований на чистому (vanilla) HTML/CSS/JS з кіберпанк-естетикою (скляний морфізм, CSS-grid, модульна архітектура). Дашборд підтримує перемикання мов (УКР/EN).
+- **Кастомні помилки:** Повністю стилізована кастомна сторінка помилки 404.
+- **Безпечна конфігурація:** Використовує `python-dotenv`, щоб уникнути витоку чутливих даних.
+- **Динамічна міграція схем:** Бекенд автоматично перевіряє таблиці при старті та виконує SQL-міграції (створення таблиць та нових колонок, якщо їх немає) без використання важких ORM.
+
+### Технології
+- **Бекенд:** Python, Flask, psycopg2
+- **База даних:** PostgreSQL (підтримує локальне середовище та хмарне, як Railway)
+- **Фронтенд:** Vanilla HTML5, CSS3, JavaScript (Fetch API)
+
+### Запуск проєкту локально
+
+#### Передумови
+1. Встановлений **Python** (рекомендовано версію 3.10+).
+2. Встановлений та запущений сервер **PostgreSQL**.
+
+#### Інструкція
+1. **Клонуйте репозиторій:**
+   ```bash
+   git clone https://github.com/Lutvunenko-Dmutro/railway-database.git
+   cd railway-database
    ```
-2. Перевірте, чи таблиця була успішно створена, використовуючи запит:
-   ```sql
-   SELECT * FROM users;
+
+2. **Налаштуйте змінні середовища:**
+   Перейменуйте файл `.env.example` на `.env` і вкажіть свої дані для підключення до PostgreSQL.
+
+3. **Встановіть залежності:**
+   ```bash
+   pip install -r requirements.txt
    ```
 
-### 5. Підключення через Python
-1. Використовуйте Python бібліотеку `psycopg2` для підключення до бази даних:
-   ```python
-   import psycopg2
-
-   connection = psycopg2.connect(
-       dbname='railway',
-       user='postgres',
-       password='your_password',
-       host='junction.proxy.rlwy.net',
-       port='19910'
-   )
-
-   cursor = connection.cursor()
-   cursor.execute("SELECT * FROM users;")
-   result = cursor.fetchall()
-   print(result)
-
-   cursor.close()
-   connection.close()
+4. **Запустіть вебсервер:**
+   ```bash
+   python app.py
    ```
-2. Запустіть Python скрипт для виведення даних з таблиці.
+   *Сервер ініціалізує базу даних, перевірить схему і запустить локальний сервер за адресою `http://127.0.0.1:5000`.*
 
-### 6. Перевірка роботи
-1. Перевірте, чи база даних працює коректно через pgAdmin або ваш Python скрипт.
-2. Переконайтесь, що запити до бази даних виконуються без помилок.
+### 📡 API Reference
 
-## Висновки
-Цей проект дозволяє створити віддалену базу даних за допомогою Railway.app, налаштувати підключення та виконувати SQL запити для роботи з даними. Все налаштовано для використання в Python додатках або через SQL клієнти.
+Базовий URL: `http://127.0.0.1:5000`
+
+| Метод | Ендпоінт | Опис | Коди відповіді |
+|-------|----------|------|----------------|
+| `GET` | `/api/users` | Отримати список всіх користувачів | `200 OK` |
+| `POST` | `/api/users` | Створити нового користувача | `201 Created`, `400`, `409` |
+| `PUT` | `/api/users/<id>` | Оновити дані користувача за ID | `200 OK`, `400`, `404`, `409` |
+| `DELETE` | `/api/users/<id>` | Видалити користувача за ID | `200 OK`, `404` |
+
+#### Тіло запиту (POST / PUT)
+```json
+{
+  "username": "cyber_ninja",
+  "name": "John Doe",
+  "email": "john@example.com",
+  "age": 25
+}
+```
+> **Валідація:** `username` — обов'язкове поле. Вік має бути від `18` до `120`. Email перевіряється на коректний формат.
+
+#### Приклад відповіді (GET)
+```json
+[
+  {
+    "id": 1,
+    "username": "cyber_ninja",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "age": 25,
+    "created_at": "Mon, 07 Sep 2026 10:00:00 GMT"
+  }
+]
+```
+
+---
+
+## <a id="english-version"></a>🇺🇸 English Version
+
+### Overview
+This repository is a full-stack proof-of-concept project demonstrating the integration of a Python Flask REST API with a PostgreSQL database. It features secure credential management, raw SQL schema migrations, and a modern, fully responsive "Cyberpunk" UI dashboard to visualize the database content.
+
+### Screenshots
+![UI Dashboard Preview](assets/demo-dashboard.png)
+![API Response Preview](assets/demo-api.png)
+
+### Key Features
+- **Flask REST API:** Provides endpoints (e.g., `GET /api/users`, `POST /api/users`, `PUT`, `DELETE`) to interact with the database programmatically.
+- **Modern UI Dashboard:** A frontend built with vanilla HTML/CSS/JS featuring a Cyberpunk aesthetic. Features built-in i18n language switching.
+- **Custom Error Handling:** A fully designed, responsive custom 404 error page.
+- **Secure Configuration:** Utilizes `python-dotenv` to ensure no sensitive credentials are leaked.
+- **Dynamic Schema Validation:** The backend automatically inspects the database at startup and performs raw SQL migrations.
+
+### Technologies Used
+- **Backend:** Python, Flask, psycopg2
+- **Database:** PostgreSQL (supports local & remote environments like Railway)
+- **Frontend:** Vanilla HTML5, CSS3, JavaScript (Fetch API)
+
+### Running the Project Locally
+
+#### Prerequisites
+1. Installed **Python** (version 3.10+ recommended)
+2. Installed and running **PostgreSQL** server.
+
+#### Setup Instructions
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Lutvunenko-Dmutro/railway-database.git
+   cd railway-database
+   ```
+
+2. **Configure Environment Variables:**
+   Rename `.env.example` to `.env`. Ensure your PostgreSQL credentials are correct.
+
+3. **Install Dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. **Start the Web Server:**
+   ```bash
+   python app.py
+   ```
+   *The server will initialize the database, verify the schema, and start a local web server at `http://127.0.0.1:5000`.*
+
+### 📡 API Reference
+
+Base URL: `http://127.0.0.1:5000`
+
+| Method | Endpoint | Description | Response Codes |
+|--------|----------|-------------|----------------|
+| `GET` | `/api/users` | Retrieve all users | `200 OK` |
+| `POST` | `/api/users` | Create a new user | `201 Created`, `400`, `409` |
+| `PUT` | `/api/users/<id>` | Update user data by ID | `200 OK`, `400`, `404`, `409` |
+| `DELETE` | `/api/users/<id>` | Delete a user by ID | `200 OK`, `404` |
+
+#### Request Body (POST / PUT)
+```json
+{
+  "username": "cyber_ninja",
+  "name": "John Doe",
+  "email": "john@example.com",
+  "age": 25
+}
+```
+> **Validation:** `username` is required. Age must be between `18` and `120`. Email is validated against a standard format.
+
+#### Example Response (GET)
+```json
+[
+  {
+    "id": 1,
+    "username": "cyber_ninja",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "age": 25,
+    "created_at": "Mon, 07 Sep 2026 10:00:00 GMT"
+  }
+]
+```
