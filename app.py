@@ -185,5 +185,6 @@ def delete_user(user_id):
 if __name__ == '__main__':
     # Запуск Flask сервера (debug вмикається тільки якщо FLASK_DEBUG=true)
     is_debug = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+    port = int(os.environ.get('PORT', 5000))
     init_db()
-    app.run(host='0.0.0.0', port=5000, debug=is_debug)
+    app.run(host='0.0.0.0', port=port, debug=is_debug)
