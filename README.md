@@ -10,6 +10,7 @@
 ![Flask](https://img.shields.io/badge/Flask-Web_Framework-black?logo=flask)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-blue.svg)
 ![Frontend](https://img.shields.io/badge/Frontend-HTML/CSS/JS-orange)
+![CI Status](https://github.com/Lutvunenko-Dmutro/railway-database/actions/workflows/ci.yml/badge.svg)
 
 ### Огляд
 Цей репозиторій — це full-stack проєкт (proof-of-concept), який демонструє інтеграцію Python Flask REST API з базою даних PostgreSQL. Проєкт включає безпечне управління конфігурацією, прямі SQL-міграції бази даних та сучасний, повністю адаптивний "Кіберпанк" UI-дашборд для управління даними.
@@ -22,6 +23,7 @@
 - **Flask REST API:** Надає ендпоінти (напр., `GET /api/users`, `POST /api/users`, `PUT /api/users/<id>`, `DELETE /api/users/<id>`) для програмної взаємодії з базою даних.
 - **Сучасний UI Дашборд:** Фронтенд побудований на чистому (vanilla) HTML/CSS/JS з кіберпанк-естетикою (скляний морфізм, CSS-grid, модульна архітектура). Дашборд підтримує перемикання мов (УКР/EN).
 - **Кастомні помилки:** Повністю стилізована кастомна сторінка помилки 404.
+- **CI/CD Pipeline:** Інтегровані GitHub Actions для автоматичного запуску `pytest` та перевірки якості коду при кожному коміті.
 - **Безпечна конфігурація:** Використовує `python-dotenv`, щоб уникнути витоку чутливих даних.
 - **Динамічна міграція схем:** Бекенд автоматично перевіряє таблиці при старті та виконує SQL-міграції (створення таблиць та нових колонок, якщо їх немає) без використання важких ORM.
 
@@ -108,6 +110,7 @@ This repository is a full-stack proof-of-concept project demonstrating the integ
 - **Flask REST API:** Provides endpoints (e.g., `GET /api/users`, `POST /api/users`, `PUT`, `DELETE`) to interact with the database programmatically.
 - **Modern UI Dashboard:** A frontend built with vanilla HTML/CSS/JS featuring a Cyberpunk aesthetic. Features built-in i18n language switching.
 - **Custom Error Handling:** A fully designed, responsive custom 404 error page.
+- **CI/CD Pipeline:** Includes GitHub Actions workflow for automated testing (`pytest`) on every commit and pull request.
 - **Secure Configuration:** Utilizes `python-dotenv` to ensure no sensitive credentials are leaked.
 - **Dynamic Schema Validation:** The backend automatically inspects the database at startup and performs raw SQL migrations.
 
