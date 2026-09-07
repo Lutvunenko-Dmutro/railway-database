@@ -77,7 +77,7 @@ def test_put_user(mock_get_db, client):
     mock_conn.cursor.return_value = mock_cursor
     mock_get_db.return_value = mock_conn
 
-    response = client.put('/api/users/1', json={"email": "new@example.com", "age": 30})
+    response = client.put('/api/users/1', json={"username": "updated_user", "email": "new@example.com", "age": 30})
     assert response.status_code == 200
 
 @patch('app.get_db_connection')
